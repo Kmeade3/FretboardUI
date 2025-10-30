@@ -1,22 +1,24 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import Grid from "./Grid";
 
-// Define your notes
-const NOTES = ["C", "C#", "D", "D#", "E", "F", "F#", "G", "G#", "A", "A#", "B"];
-
-function getNoteAtFret(openNote: string, fret: number): string {
-  const indexOfOpen = NOTES.indexOf(openNote);
-  if (indexOfOpen === -1) throw new Error(`Invalid note: ${openNote}`);
-  const index = (indexOfOpen + fret) % NOTES.length;
-  return NOTES[index] as string;
-}
+const allTunings = [
+  { name: "E-Standard", notes: ["E", "A", "D", "G", "B", "E"], strings: 6 },
+  { name: "D-Standard", notes: ["D", "G", "C", "F", "A", "D"], strings: 6 },
+  { name: "C-Standard", notes: ["C", "F", "A#", "D#", "G", "C"], strings: 6 },
+  { name: "Drop D", notes: ["D", "A", "D", "G", "B", "E"], strings: 6 },
+  { name: "Ukulele Standard", notes: ["G", "C", "E", "A"], strings: 4 },
+  { name: "Ukulele Low G", notes: ["F", "C", "E", "A"], strings: 4 },
+  { name: "7-String Standard", notes: ["B", "E", "A", "D", "G", "B", "E"], strings: 7 },
+  { name: "8-String Standard", notes: ["F#", "B", "E", "A", "D", "G", "B", "E"], strings: 8 },
+];
 
 function App() {
-  const [tuning, setTuning] = useState("E");
+  const [tuning, setTuning] = useState(["E", "A", "D", "G", "B", "E"]);
   const [strings, setStrings] = useState(6);
   const [frets, setFrets] = useState(24);
   const [notes, setNotes] = useState<string[]>([]);
 
+  /*
   const generateNotes = () => {
     const result: string[] = [];
     for (let fret = 0; fret <= frets; fret++) {
@@ -24,6 +26,7 @@ function App() {
     }
     setNotes(result);
   };
+  */
 
   return (
     <div style={{ fontFamily: "sans-serif", padding: "1rem" }}>
@@ -31,17 +34,40 @@ function App() {
 
       <div style={{ marginBottom: "1rem" }}>
         <label>
-          Tuning:{" "}
+          Strings:{" "}
           <select
-            value={tuning}
-            onChange={(e) => setTuning(e.target.value)}
+            value={strings}
+            onChange={(e) => {
+              const newStrings = Number(e.target.value);
+              setStrings(newStrings);
+
+              // Reset tuning to the first valid option for this string count
+              const firstTuning = allTunings.find(t => t.strings === newStrings);
+              if (firstTuning) setTuning(firstTuning.notes);
+            }}
             style={{ marginRight: "1rem" }}
           >
-            <option value="E">E</option>
-            <option value="A">A</option>
-            <option value="D">D</option>
-            <option value="G">G</option>
-            <option value="B">B</option>
+            <option value={6}>6-String</option>
+            <option value={7}>7-String</option>
+            <option value={8}>8-String</option>
+            <option value={4}>Ukulele</option>
+          </select>
+        </label>
+
+        <label>
+          Tuning:{" "}
+          <select
+            value={tuning.join(" ")}
+            onChange={(e) => setTuning(e.target.value.split(" "))}
+            style={{ marginRight: "1rem" }}
+          >
+            {allTunings
+              .filter((t) => t.strings === strings)
+              .map((t) => (
+                <option key={t.name} value={t.notes.join(" ")}>
+                  {t.name}
+                </option>
+              ))}
           </select>
         </label>
 
@@ -56,20 +82,11 @@ function App() {
           />
         </label>
 
-        <label>
-          Strings:{" "}
-          <input
-            type="number"
-            value={strings}
-            onChange={(e) => setStrings(Number(e.target.value))}
-            min={4}
-            max={12}
-          />
-        </label>
-
+      {/*
         <button onClick={generateNotes} style={{ marginLeft: "1rem" }}>
           Generate
         </button>
+      */}
       </div>
 
       {notes.length > 0 && (
