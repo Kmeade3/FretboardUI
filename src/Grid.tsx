@@ -85,6 +85,34 @@ const Grid: React.FC<GridProps> = ({ rows, cols, pitches, scale }) => {
           width: "100vw",
         }}
       >
+        {/* Fret numbers */}
+        <div
+          style={{
+            position: "relative",
+            width: lastDimensions.current.cols * cellSize + 1,
+            height: 30,
+            marginBottom: "0.5rem",
+          }}
+        >
+          {Array.from({ length: lastDimensions.current.cols }, (_, i) => (
+            <div
+              key={i}
+              style={{
+                position: "absolute",
+                left: i * cellSize,
+                top: 0,
+                width: cellSize,
+                textAlign: "center",
+                fontSize: "14px",
+                fontWeight: "bold",
+                color: "#ccc",
+              }}
+            >
+              {i + 1}
+            </div>
+          ))}
+        </div>
+
         <div
           style={{
             position: "relative",
