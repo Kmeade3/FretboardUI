@@ -2,49 +2,44 @@ import React, { useState, useRef } from "react";
 
 interface Note {
   active: boolean;
-  color: string;
   pitch: string;
 }
 
 interface GridProps {
   rows: number;
   cols: number;
+  pitches: string[][];
+  scale: string[];
 }
 
-const Grid: React.FC<GridProps> = ({ rows, cols }) => {
+const Grid: React.FC<GridProps> = ({ rows, cols, pitches, scale }) => {
   const cellSize = 60;
   const lineColor = "#ccc";
 
   const generateGrid = (r: number, c: number): Note[][] =>
-    Array.from({ length: r + 1}, (_, row) =>
-      Array.from({ length: c }, (_, col) => ({
+    Array.from({ length: r + 1 }, (_, row) =>
+      Array.from({ length: c + 1 }, (_, col) => ({
         active: false,
-        color: "#999",
-        pitch: `Note-${row}-${col}`,
+        pitch: pitches[row][col],
       }))
     );
 
-  // ✅ Store the last used grid dimensions
   const lastDimensions = useRef({ rows, cols });
+  const [notes, setNotes] = useState<Note[][]>(() => generateGrid(rows, cols));
 
-  // ✅ Initialize once using the starting props
-  const [notes, setNotes] = useState<Note[][]>(() =>
-    generateGrid(rows, cols)
-  );
+  const [scaleHighlight, setScaleHighlight] = useState(false);
 
-  // ✅ Only regenerate when the button is pressed
   const handleGenerateGrid = () => {
     setNotes(generateGrid(rows, cols));
     lastDimensions.current = { rows, cols };
   };
 
-  // ✅ Modify notes without regenerating
   const toggleNote = (r: number, c: number) => {
     setNotes(prev =>
       prev.map((row, ri) =>
         row.map((note, ci) =>
           ri === r && ci === c
-            ? { ...note, active: !note.active, color: note.active ? "#999" : "#4caf50" }
+            ? { ...note, active: !note.active }
             : note
         )
       )
@@ -66,44 +61,87 @@ const Grid: React.FC<GridProps> = ({ rows, cols }) => {
         Generate Grid
       </button>
 
-      <div
+      <button
+        onClick={() => setScaleHighlight(prev => !prev)}
         style={{
-          position: "relative",
-          width: lastDimensions.current.cols * cellSize + 1,
-          height: lastDimensions.current.rows * cellSize + 1,
-          backgroundImage: `
-            linear-gradient(to right, ${lineColor} 1px, transparent 1px),
-            linear-gradient(to bottom, ${lineColor} 1px, transparent 1px)
-          `,
-          backgroundSize: `${cellSize}px ${cellSize}px`,
+          marginBottom: "1rem",
+          marginLeft: "1rem",
+          padding: "0.5rem 1rem",
+          border: "1px solid #ccc",
+          borderRadius: "8px",
+          cursor: "pointer",
         }}
       >
-        {notes.map((row, r) =>
-          row.map((note, c) => {
-            const x = c * cellSize + cellSize / 2;
-            const y = r * cellSize;
+        {scaleHighlight ? "Key Highlight On" : "Key Highlight Off"}
+      </button>
 
-            return (
-              <div
-                key={`${r}-${c}`}
-                title={note.pitch}
-                onClick={() => toggleNote(r, c)}
-                style={{
-                  position: "absolute",
-                  left: x,
-                  top: y,
-                  width: 12,
-                  height: 12,
-                  background: note.color,
-                  borderRadius: "50%",
-                  transform: "translate(-50%, -50%)",
-                  cursor: "pointer",
-                  transition: "background 0.2s ease",
-                }}
-              />
-            );
-          })
-        )}
+      <div
+        style={{
+          display: "flex",
+          flexDirection: "column",
+          justifyContent: "center",
+          alignItems: "center",
+          height: "60vh",
+          width: "100vw",
+        }}
+      >
+        <div
+          style={{
+            position: "relative",
+            width: lastDimensions.current.cols * cellSize + 1,
+            height: lastDimensions.current.rows * cellSize + 1,
+            backgroundImage: `
+              linear-gradient(to right, ${lineColor} 1px, transparent 1px),
+              linear-gradient(to bottom, ${lineColor} 1px, transparent 1px)
+            `,
+            backgroundSize: `${cellSize}px ${cellSize}px`,
+          }}
+        >
+          {notes.map((row, r) =>
+            row.map((note, c) => {
+              const isOpenNote = c === 0;
+              const x = isOpenNote ? -cellSize / 2 : (c - 1) * cellSize + cellSize / 2;
+              const y = r * cellSize;
+
+              // Compute color dynamically
+              const backgroundColor =
+                scaleHighlight && scale.includes(note.pitch)
+                  ? "#4caf50"
+                  : note.active
+                  ? "#4caf50"
+                  : "#242424";
+
+              return (
+                <div
+                  key={`${r}-${c}`}
+                  title={note.pitch}
+                  onClick={() => toggleNote(r, c)}
+                  style={{
+                    position: "absolute",
+                    left: x,
+                    top: y,
+                    width: cellSize - 30,
+                    height: cellSize - 30,
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    background: backgroundColor,
+                    border: "1px solid #ccc",
+                    borderRadius: 12,
+                    transform: "translate(-50%, -50%)",
+                    cursor: "pointer",
+                    transition: "background 0.2s ease",
+                    fontSize: "14px",
+                    fontWeight: "bold",
+                    color: "#fff",
+                  }}
+                >
+                  {note.pitch}
+                </div>
+              );
+            })
+          )}
+        </div>
       </div>
     </div>
   );
