@@ -1,37 +1,113 @@
 import { useEffect, useState } from "react";
 import Grid from "./Grid";
 
+interface NoteWithOctave {
+  note: string;
+  octave: number;
+}
+
 const allTunings = [
-  // 6-String Tunings
-  { name: "E-Standard", notes: ["E", "B", "G", "D", "A", "E"], strings: 6 },
-  { name: "D#-Standard", notes: ["D#", "A#", "F#", "C#", "G#", "D#"], strings: 6 },
-  { name: "D-Standard", notes: ["D", "A", "F", "C", "G", "D"], strings: 6 },
-  { name: "C#-Standard", notes: ["C#", "G#", "E", "B", "F#", "C#"], strings: 6 },
-  { name: "C-Standard", notes: ["C", "G", "D#", "A#", "F", "C"], strings: 6 },
-  { name: "Drop D", notes: ["E", "B", "G", "D", "A", "D"], strings: 6 },
-  { name: "Drop C#", notes: ["D#", "A#", "F#", "C#", "G#", "C#"], strings: 6 },
-  { name: "Drop C", notes: ["D", "A", "F", "C", "G", "C"], strings: 6 },
-  { name: "Drop B", notes: ["C#", "G#", "E", "B", "F#", "B"], strings: 6 },
-  { name: "Drop A", notes: ["B", "F#", "D", "A", "E", "A"], strings: 6 },
-  { name: "Open D", notes: ["D", "A", "F#", "D", "A", "D"], strings: 6 },
-  { name: "Open G", notes: ["D", "B", "G", "D", "G", "D"], strings: 6 },
-  { name: "Open C", notes: ["C", "G", "C", "G", "C", "E"], strings: 6 },
+  // 6-String Tunings (high to low: E4, B3, G3, D3, A2, E2)
+  { name: "E-Standard", notes: [
+    { note: "E", octave: 4 }, { note: "B", octave: 3 }, { note: "G", octave: 3 },
+    { note: "D", octave: 3 }, { note: "A", octave: 2 }, { note: "E", octave: 2 }
+  ], strings: 6 },
+  { name: "D#-Standard", notes: [
+    { note: "D#", octave: 4 }, { note: "A#", octave: 3 }, { note: "F#", octave: 3 },
+    { note: "C#", octave: 3 }, { note: "G#", octave: 2 }, { note: "D#", octave: 2 }
+  ], strings: 6 },
+  { name: "D-Standard", notes: [
+    { note: "D", octave: 4 }, { note: "A", octave: 3 }, { note: "F", octave: 3 },
+    { note: "C", octave: 3 }, { note: "G", octave: 2 }, { note: "D", octave: 2 }
+  ], strings: 6 },
+  { name: "C#-Standard", notes: [
+    { note: "C#", octave: 4 }, { note: "G#", octave: 3 }, { note: "E", octave: 3 },
+    { note: "B", octave: 2 }, { note: "F#", octave: 2 }, { note: "C#", octave: 2 }
+  ], strings: 6 },
+  { name: "C-Standard", notes: [
+    { note: "C", octave: 4 }, { note: "G", octave: 3 }, { note: "D#", octave: 3 },
+    { note: "A#", octave: 2 }, { note: "F", octave: 2 }, { note: "C", octave: 2 }
+  ], strings: 6 },
+  { name: "Drop D", notes: [
+    { note: "E", octave: 4 }, { note: "B", octave: 3 }, { note: "G", octave: 3 },
+    { note: "D", octave: 3 }, { note: "A", octave: 2 }, { note: "D", octave: 2 }
+  ], strings: 6 },
+  { name: "Drop C#", notes: [
+    { note: "D#", octave: 4 }, { note: "A#", octave: 3 }, { note: "F#", octave: 3 },
+    { note: "C#", octave: 3 }, { note: "G#", octave: 2 }, { note: "C#", octave: 2 }
+  ], strings: 6 },
+  { name: "Drop C", notes: [
+    { note: "D", octave: 4 }, { note: "A", octave: 3 }, { note: "F", octave: 3 },
+    { note: "C", octave: 3 }, { note: "G", octave: 2 }, { note: "C", octave: 2 }
+  ], strings: 6 },
+  { name: "Drop B", notes: [
+    { note: "C#", octave: 4 }, { note: "G#", octave: 3 }, { note: "E", octave: 3 },
+    { note: "B", octave: 2 }, { note: "F#", octave: 2 }, { note: "B", octave: 1 }
+  ], strings: 6 },
+  { name: "Drop A", notes: [
+    { note: "B", octave: 3 }, { note: "F#", octave: 3 }, { note: "D", octave: 3 },
+    { note: "A", octave: 2 }, { note: "E", octave: 2 }, { note: "A", octave: 1 }
+  ], strings: 6 },
+  { name: "Open D", notes: [
+    { note: "D", octave: 4 }, { note: "A", octave: 3 }, { note: "F#", octave: 3 },
+    { note: "D", octave: 3 }, { note: "A", octave: 2 }, { note: "D", octave: 2 }
+  ], strings: 6 },
+  { name: "Open G", notes: [
+    { note: "D", octave: 4 }, { note: "B", octave: 3 }, { note: "G", octave: 3 },
+    { note: "D", octave: 3 }, { note: "G", octave: 2 }, { note: "D", octave: 2 }
+  ], strings: 6 },
+  { name: "Open C", notes: [
+    { note: "C", octave: 4 }, { note: "G", octave: 3 }, { note: "C", octave: 3 },
+    { note: "G", octave: 2 }, { note: "C", octave: 2 }, { note: "E", octave: 2 }
+  ], strings: 6 },
 
-  // Ukulele Tunings
-  { name: "Ukulele Standard", notes: ["A", "E", "C", "G"], strings: 4 },
-  { name: "Drop F", notes: ["A", "E", "C", "F"], strings: 4 },
+  // Ukulele Tunings (high to low: A4, E4, C4, G4 - reentrant)
+  { name: "Ukulele Standard", notes: [
+    { note: "A", octave: 4 }, { note: "E", octave: 4 }, { note: "C", octave: 4 }, { note: "G", octave: 4 }
+  ], strings: 4 },
+  { name: "Drop F", notes: [
+    { note: "A", octave: 4 }, { note: "E", octave: 4 }, { note: "C", octave: 4 }, { note: "F", octave: 3 }
+  ], strings: 4 },
 
-  // 7-String Tunings
-  { name: "7-String Standard", notes: ["E", "B", "G", "D", "A", "E", "B"], strings: 7 },
-  { name: "Drop A", notes: ["E", "B", "G", "D", "A", "E", "A"], strings: 7 },
-  { name: "Drop G#", notes: ["D#", "A#", "F#", "C#", "G#", "D#", "G#"], strings: 7 },
-  { name: "Drop G", notes: ["D", "A", "F", "C", "G", "D", "G"], strings: 7 },
+  // 7-String Tunings (high to low: E4, B3, G3, D3, A2, E2, B1)
+  { name: "7-String Standard", notes: [
+    { note: "E", octave: 4 }, { note: "B", octave: 3 }, { note: "G", octave: 3 },
+    { note: "D", octave: 3 }, { note: "A", octave: 2 }, { note: "E", octave: 2 }, { note: "B", octave: 1 }
+  ], strings: 7 },
+  { name: "Drop A", notes: [
+    { note: "E", octave: 4 }, { note: "B", octave: 3 }, { note: "G", octave: 3 },
+    { note: "D", octave: 3 }, { note: "A", octave: 2 }, { note: "E", octave: 2 }, { note: "A", octave: 1 }
+  ], strings: 7 },
+  { name: "Drop G#", notes: [
+    { note: "D#", octave: 4 }, { note: "A#", octave: 3 }, { note: "F#", octave: 3 },
+    { note: "C#", octave: 3 }, { note: "G#", octave: 2 }, { note: "D#", octave: 2 }, { note: "G#", octave: 1 }
+  ], strings: 7 },
+  { name: "Drop G", notes: [
+    { note: "D", octave: 4 }, { note: "A", octave: 3 }, { note: "F", octave: 3 },
+    { note: "C", octave: 3 }, { note: "G", octave: 2 }, { note: "D", octave: 2 }, { note: "G", octave: 1 }
+  ], strings: 7 },
 
-  // 8-String Tunings
-  { name: "8-String Standard", notes: ["E", "B", "G", "D", "A", "E", "B", "F#"], strings: 8 },
-  { name: "Drop E", notes: ["E", "B", "G", "D", "A", "E", "B", "E"], strings: 8 },
-  { name: "Drop D#", notes: ["D#", "A#", "D#", "G#", "C#", "F#", "A#", "D#"], strings: 8 },
-  { name: "Drop D", notes: ["D", "A", "D", "G", "C", "F", "A", "D"], strings: 8 },
+  // 8-String Tunings (high to low: E4, B3, G3, D3, A2, E2, B1, F#1)
+  { name: "8-String Standard", notes: [
+    { note: "E", octave: 4 }, { note: "B", octave: 3 }, { note: "G", octave: 3 },
+    { note: "D", octave: 3 }, { note: "A", octave: 2 }, { note: "E", octave: 2 },
+    { note: "B", octave: 1 }, { note: "F#", octave: 1 }
+  ], strings: 8 },
+  { name: "Drop E", notes: [
+    { note: "E", octave: 4 }, { note: "B", octave: 3 }, { note: "G", octave: 3 },
+    { note: "D", octave: 3 }, { note: "A", octave: 2 }, { note: "E", octave: 2 },
+    { note: "B", octave: 1 }, { note: "E", octave: 1 }
+  ], strings: 8 },
+  { name: "Drop D#", notes: [
+    { note: "D#", octave: 4 }, { note: "A#", octave: 3 }, { note: "D#", octave: 3 },
+    { note: "G#", octave: 2 }, { note: "C#", octave: 2 }, { note: "F#", octave: 2 },
+    { note: "A#", octave: 1 }, { note: "D#", octave: 1 }
+  ], strings: 8 },
+  { name: "Drop D", notes: [
+    { note: "D", octave: 4 }, { note: "A", octave: 3 }, { note: "D", octave: 3 },
+    { note: "G", octave: 2 }, { note: "C", octave: 2 }, { note: "F", octave: 2 },
+    { note: "A", octave: 1 }, { note: "D", octave: 1 }
+  ], strings: 8 },
 ];
 
 
@@ -53,15 +129,24 @@ const SCALE_INTERVALS: Record<string, number[]> = {
 
 const CHROMATIC_NOTES = ["C", "C#", "D", "D#", "E", "F", "F#", "G", "G#", "A", "A#", "B"];
 
-function generateFretboard(tuning: string[], frets: number): string[][] {
+function generateFretboard(tuning: NoteWithOctave[], frets: number): NoteWithOctave[][] {
   return tuning.map((openNote) => {
-    const stringNotes: string[] = [];
-    const startIndex = CHROMATIC_NOTES.indexOf(openNote);
-    if (startIndex === -1) throw new Error(`Invalid note in tuning: ${openNote}`);
+    const stringNotes: NoteWithOctave[] = [];
+    const startIndex = CHROMATIC_NOTES.indexOf(openNote.note);
+    if (startIndex === -1) throw new Error(`Invalid note in tuning: ${openNote.note}`);
+
+    let currentOctave = openNote.octave;
 
     for (let fret = 0; fret <= frets; fret++) {
       const noteIndex = (startIndex + fret) % CHROMATIC_NOTES.length;
-      stringNotes.push(CHROMATIC_NOTES[noteIndex]);
+      const noteName = CHROMATIC_NOTES[noteIndex];
+      
+      // Increment octave when we wrap from B to C
+      if (fret > 0 && noteIndex === 0) {
+        currentOctave++;
+      }
+      
+      stringNotes.push({ note: noteName, octave: currentOctave });
     }
 
     return stringNotes;
@@ -79,7 +164,10 @@ function getScaleNotes(scale: string, root: string): string[] {
 }
 
 function App() {
-  const [tuning, setTuning] = useState(["E", "B", "G", "D", "A", "E"]);
+  const [tuning, setTuning] = useState<NoteWithOctave[]>([
+    { note: "E", octave: 4 }, { note: "B", octave: 3 }, { note: "G", octave: 3 },
+    { note: "D", octave: 3 }, { note: "A", octave: 2 }, { note: "E", octave: 2 }
+  ]);
   const [strings, setStrings] = useState(6);
   const [frets, setFrets] = useState(24);
   const [notes, setNotes] = useState<string[]>([]);
@@ -121,14 +209,19 @@ function App() {
         <label>
           Tuning:{" "}
           <select
-            value={tuning.join(" ")}
-            onChange={(e) => setTuning(e.target.value.split(" "))}
+            value={tuning.map(n => n.note).join(" ")}
+            onChange={(e) => {
+              const selectedTuning = allTunings.find(
+                t => t.notes.map(n => n.note).join(" ") === e.target.value
+              );
+              if (selectedTuning) setTuning(selectedTuning.notes);
+            }}
             style={{ marginRight: "1rem" }}
           >
             {allTunings
               .filter((t) => t.strings === strings)
               .map((t) => (
-                <option key={t.name} value={t.notes.join(" ")}>
+                <option key={t.name} value={t.notes.map(n => n.note).join(" ")}>
                   {t.name}
                 </option>
               ))}
@@ -188,7 +281,7 @@ function App() {
       </div>
       {notes.length > 0 && (
         <div>
-          <h2>Notes on the {tuning} string:</h2>
+          <h2>Notes on the string:</h2>
           <p>{notes.join(" - ")}</p>
         </div>
       )}

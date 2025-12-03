@@ -1,14 +1,20 @@
 import React, { useState, useRef } from "react";
 
+interface NoteWithOctave {
+  note: string;
+  octave: number;
+}
+
 interface Note {
   active: boolean;
   pitch: string;
+  octave: number;
 }
 
 interface GridProps {
   rows: number;
   cols: number;
-  pitches: string[][];
+  pitches: NoteWithOctave[][];
   scale: string[];
 }
 
@@ -20,7 +26,8 @@ const Grid: React.FC<GridProps> = ({ rows, cols, pitches, scale }) => {
     Array.from({ length: r + 1 }, (_, row) =>
       Array.from({ length: c + 1 }, (_, col) => ({
         active: false,
-        pitch: pitches[row][col],
+        pitch: pitches[row][col].note,
+        octave: pitches[row][col].octave,
       }))
     );
 
@@ -28,6 +35,7 @@ const Grid: React.FC<GridProps> = ({ rows, cols, pitches, scale }) => {
   const [notes, setNotes] = useState<Note[][]>(() => generateGrid(rows, cols));
 
   const [scaleHighlight, setScaleHighlight] = useState(false);
+  const [showOctaves, setShowOctaves] = useState(true);
 
   const handleGenerateGrid = () => {
     setNotes(generateGrid(rows, cols));
@@ -73,6 +81,20 @@ const Grid: React.FC<GridProps> = ({ rows, cols, pitches, scale }) => {
         }}
       >
         {scaleHighlight ? "Key Highlight On" : "Key Highlight Off"}
+      </button>
+
+      <button
+        onClick={() => setShowOctaves(prev => !prev)}
+        style={{
+          marginBottom: "1rem",
+          marginLeft: "1rem",
+          padding: "0.5rem 1rem",
+          border: "1px solid #ccc",
+          borderRadius: "8px",
+          cursor: "pointer",
+        }}
+      >
+        {showOctaves ? "Octaves On" : "Octaves Off"}
       </button>
 
       <div
@@ -142,7 +164,7 @@ const Grid: React.FC<GridProps> = ({ rows, cols, pitches, scale }) => {
               return (
                 <div
                   key={`${r}-${c}`}
-                  title={note.pitch}
+                  title={`${note.pitch}${note.octave}`}
                   onClick={() => toggleNote(r, c)}
                   style={{
                     position: "absolute",
@@ -165,6 +187,9 @@ const Grid: React.FC<GridProps> = ({ rows, cols, pitches, scale }) => {
                   }}
                 >
                   {note.pitch}
+                  {showOctaves && (
+                    <span style={{ fontSize: "9px", opacity: 0.7, marginLeft: "2px" }}>{note.octave}</span>
+                  )}
                 </div>
               );
             })
